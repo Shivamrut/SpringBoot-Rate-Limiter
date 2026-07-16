@@ -1,0 +1,14 @@
+{
+  "java.jdt.ls.java.home": "/usr/lib/jvm/temurin-25-jdk-amd64",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-25",
+      "path": "/usr/lib/jvm/temurin-25-jdk-amd64",
+      "default": true
+    }
+  ],
+  "terminal.integrated.env.linux": {
+    "JAVA_HOME": "/usr/lib/jvm/temurin-25-jdk-amd64",
+    "PATH": "/usr/lib/jvm/temurin-25-jdk-amd64/bin:${env:PATH}"
+  }
+}
