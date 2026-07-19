@@ -1,7 +1,21 @@
+# Spring Boot / Maven
 HELP.md
 target/
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Compiled / packaged
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Keep Maven Wrapper tracked (do not ignore)
+# mvnw
+# mvnw.cmd
+# .mvn/
 
 ### STS ###
 .apt_generated
@@ -17,6 +31,7 @@ target/
 *.iws
 *.iml
 *.ipr
+out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +46,13 @@ build/
 ### VS Code ###
 .vscode/*
 !.vscode/settings.json
+!.vscode/extensions.json
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Env / secrets ###
+.env
+.env.*
+!.env.example
