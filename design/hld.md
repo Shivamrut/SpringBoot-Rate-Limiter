@@ -102,10 +102,86 @@ The core feature of this application to provide rate limiting per client per end
 *No need for v1*
 
 ## 6. High-Level Architecture Diagram
+![img1](./high-level-arch-01.png)
+```
+graph LR
+    %% Define Styles and Themes
+    classDef actor fill:#eaeaea,stroke:#333,stroke-width:2px,shape:stadium;
+    classDef boundary fill:#f9f9f9,stroke:#999,stroke-dasharray: 5 5,stroke-width:2px;
+    classDef infra fill:#d2e5ff,stroke:#3176d6,stroke-width:2px;
+
+    %% External Actors
+    subgraph External_Callers [External Actors]
+        Dev["👤 Consumers / Developers<br>(Standard / Premium Apps)"]:::actor
+        Bot["🤖 Automation Bots / Scripts<br>(High-Volume / Load Testing)"]:::actor
+        Op["⚡ Operators / Maintainers<br>(Unrestricted Admin / Health)"]:::actor
+    end
+
+    %% Deployment Boundary
+    subgraph Deployment_Box [PulseAPI Deployment Boundary]
+        LB["⚖️ Load Balancer / Ingress"]:::infra
+        
+        subgraph App_Cluster [Application Cluster]
+            API_1["📦 PulseAPI Instance 1"]:::infra
+            API_2["📦 PulseAPI Instance N"]:::infra
+        end
+    end
+
+    %% Traffic Relationships
+    Dev -->|"/v1/* (Rate Limited by Tier)"| LB
+    Bot -->|"/v1/* (Aggressive / High QPS Traffic)"| LB
+    Op -->|"/health or Unrestricted Paths"| LB
+
+    %% Internal Routing
+    LB --> API_1
+    LB --> API_2
+
+    %% Apply classes
+    class Deployment_Box boundary;
+```
+![img2](./high-level-arch-02.png)
+```
+---
+config:
+  layout: elk
+---
+graph TD
+    classDef request fill:#fff2cc,stroke:#d6b656,stroke-width:2px;
+    classDef layer fill:#f5f5f5,stroke:#666,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef tier fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px;
+    classDef logic fill:#d5e8d4,stroke:#82b366,stroke-width:2px;
+    Req["📥 Incoming Request<br>(API Key + Endpoint PATH)"]:::request
+    subgraph Identity_Tiering [1. Identity & Tier Resolution]
+        direction LR
+        Free["🟢 Free Tier<br>(e.g., 30 req/min)"]:::tier
+        Std["🔵 Standard Tier<br>(e.g., 200 req/min)"]:::tier
+        Prem["👑 Premium Tier<br>(e.g., 500 req/min)"]:::tier
+    end
+    subgraph Limit_Matrix [2. Composite Limit Matrix Enforcer]
+        Matrix{"📍 Match Counter:<br>Client ID<br>×<br>Endpoint Path<br>×<br>Tier Limits"}
+    end
+    subgraph Outcomes [3. Execution Path]
+        Allow["✅ Pass to Business Logic<br>(Under Limit)"]:::logic
+        Block["❌ HTTP 429 Throttle<br>(Limit Exceeded)"]
+    end
+    Req --> Identity_Tiering
+    Identity_Tiering -->|Resolves Client Identity| Matrix
+    
+    Matrix -->|Counter < Max| Allow
+    Matrix -->|Counter >= Max| Block
+
+    class Identity_Tiering,Limit_Matrix layer;
+```
 
 ### 6.1 Context (external actors)
+
+
 ### 6.2 Container / component view
+
+
 ### 6.3 Key interactions (arrows labeled)
+
+
 
 ## 7. Component Responsibilities
 

@@ -190,15 +190,138 @@ Payloads are small JSON (quotes, short convert I/O). At ~23–200 QPS, bandwidth
 
 ## 6. High-Level Architecture Diagram
 
+§1–5 answered **what** and **how big**. §6 answers **where traffic and logic sit** (topology + pipeline). It should not re-argue requirements — only place them in space.
+
 ### 6.1 Context (external actors)
+
+| Actor | Path | Rate-limited? |
+|---|---|---|
+| API consumers | `/v1/*` + API key | Yes, by tier |
+| Bots / scripts | Same `/v1/*` | Yes (often louder) |
+| Operators | `/health` | No |
+
+![Img1](./cursor-01.png)
+
+```
+flowchart LR
+  subgraph Actors["External actors"]
+    Dev["API consumers"]
+    Bot["Bots / scripts"]
+    Op["Operators"]
+  end
+
+  subgraph Edge["Deployment boundary"]
+    LB["Load balancer / ingress"]
+    subgraph Cluster["App cluster"]
+      I1["PulseAPI instance 1"]
+      IN["PulseAPI instance N"]
+    end
+  end
+
+  Dev --> LB
+  Bot --> LB
+  Op --> LB
+  LB --> I1
+  LB --> IN
+```
+
 ### 6.2 Container / component view
-### 6.3 Key interactions (arrows labeled)
+
+One deployable service (per §4.2). Logical layers inside each instance:
+![Img2](./cursor-02.png)
+
+```
+flowchart TB
+  LB["Load balancer"] --> Inst
+
+  subgraph Inst["PulseAPI instance"]
+    HTTP["HTTP adapters"]
+    Cross["Cross-cutting: auth → rate limit"]
+    Biz["Domain: quotes · convert · usage"]
+    State["State: keys · quotes · counters"]
+  end
+
+  LB --> HTTP --> Cross --> Biz
+  Cross --> State
+  Biz --> State
+```
+
+Shared vs local counters is deferred to §9/§11; Phase 1 may keep all state in-process.
+
+### 6.3 Key interactions (request pipeline)
+
+Enforcement order (from FR): **identity → limit check → business work**. Health short-circuits limits.
+
+![Img3](./cursor-03.png)
+
+```
+flowchart TD
+  R[Request] --> A{Valid API key?}
+  A -->|no| E401[401]
+  A -->|yes| H{/health?}
+  H -->|yes| OKH[200]
+  H -->|no| L{Under limit for<br/>client × endpoint × tier?}
+  L -->|no| E429[429 + headers]
+  L -->|yes| B[Business logic] --> OK[2xx + headers]
+```
 
 ## 7. Component Responsibilities
 
-### 7.1 Component list
-### 7.2 Ownership boundaries (what each does / does not do)
-### 7.3 Dependencies between components
+### 7.1 Component list (partition only)
+
+| Module | Owns this seam | Maps to (Spring-ish) |
+|---|---|---|
+| **HttpApi** | Routes + DTO bind/validate | `@RestController` |
+| **Auth** | Key → `clientId`/`tier` or reject | `Filter` / `Interceptor` |
+| **RateLimit** | Allow/deny + rate headers for a resolved identity | `Filter` / `Interceptor` after Auth |
+| **LimitStore** | Counter read/increment for `(client, endpoint, window)` | Port + in-memory/Redis adapter |
+| **Quotes** | Catalog ops (random, id, create, batch) | `@Service` + store |
+| **Convert** | Text ops + artificial delay | `@Service` |
+| **Usage** | Read *this* client’s counters without charging other endpoints’ buckets | `@Service` / thin controller |
+| **Health** | Liveness only | `@RestController` outside Auth/RateLimit chain |
+| **Config** | Tier×endpoint maxima, delays, seed keys | `application.yml` / `@ConfigurationProperties` |
+
+No new product rules above — only **where the rule lives**.
+
+### 7.2 Ownership boundaries (seams, not requirements)
+
+Only the **cut lines** that prevent tangled code. Requirements stay in §2.
+
+| Seam | Owner | Neighbor must not |
+|---|---|---|
+| HTTP ↔ domain | HttpApi | Controllers do not increment counters or resolve tiers |
+| Identity ↔ limits | Auth then RateLimit | RateLimit never parses keys; Auth never mutates counters |
+| Limits ↔ domain | RateLimit before Quotes/Convert | Domain services assume “already allowed” |
+| Limits ↔ persistence | RateLimit / Usage → LimitStore | LimitStore has no HTTP or DTO knowledge |
+| Ops ↔ product | Health | Health not behind per-client limiter |
+
+Side-effect rule (already in FR): 401/429 happen **before** Quotes/Convert run — enforced by filter order, not by re-checking in services.
+
+### 7.3 Dependencies (call / data edges)
+
+![img4](./cursor-04.png)
+
+```
+flowchart LR
+  HttpApi --> Auth
+  HttpApi --> RateLimit
+  HttpApi --> Quotes
+  HttpApi --> Convert
+  HttpApi --> Usage
+  Auth --> KeyMap["key registry"]
+  RateLimit --> LimitStore
+  Usage --> LimitStore
+  Quotes --> QuoteCatalog
+  RateLimit --> Config
+  Auth --> Config
+```
+
+**Build order (not a requirements repeat):**
+
+1. HttpApi + Quotes + Convert + Health + in-memory catalogs  
+2. Auth + key registry  
+3. RateLimit + LimitStore  
+4. Shared LimitStore only when multi-instance correctness is required (§11)
 
 ## 8. API Design
 
