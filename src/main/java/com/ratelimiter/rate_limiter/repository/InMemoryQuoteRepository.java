@@ -9,6 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Repository;
 
+import com.ratelimiter.rate_limiter.domain.BatchQuotes;
 import com.ratelimiter.rate_limiter.domain.Quote;
 
 import lombok.extern.slf4j.Slf4j;
@@ -62,4 +63,29 @@ public class InMemoryQuoteRepository implements QuoteRepository {
         return quote;
     }
     
+    @Override
+    public Optional<Quote> getQuoteById(String id) {
+        return Optional.ofNullable(quotesMap.get(id));
+    }
+
+    @Override
+    public BatchQuotes fetchQuotes(List<String> ids) {
+        BatchQuotes quotes = new BatchQuotes();
+        List<Quote> quotesFound = new ArrayList<>();
+        List<String> notFound = new ArrayList<>();
+        for(String id : ids){
+            Quote quote = quotesMap.get(id);
+            if(quote!=null){
+                quotesFound.add(quote);
+            }
+            else {
+                notFound.add(id);
+            }
+        }
+        quotes.setQuotes(quotesFound);
+        quotes.setFound(quotesFound.size());
+        quotes.setNotFound(notFound);
+        return quotes;
+    }
+
 }

@@ -1,8 +1,13 @@
 package com.ratelimiter.rate_limiter.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.ratelimiter.rate_limiter.domain.BatchQuotes;
 import com.ratelimiter.rate_limiter.domain.Quote;
+import com.ratelimiter.rate_limiter.dto.BatchQuotesResponse;
 import com.ratelimiter.rate_limiter.dto.CreateQuoteResponse;
 import com.ratelimiter.rate_limiter.dto.QuoteResponse;
 import com.ratelimiter.rate_limiter.dto.QuoteStatus;
@@ -26,5 +31,26 @@ public class QuoteMapper {
                             .id(quote.getId())
                             .status(QuoteStatus.ACCEPTED)
                             .build();
+    }
+
+    public BatchQuotesResponse toBatchQuotesResponse(BatchQuotes quotes){
+        List<QuoteResponse> quoteList = new ArrayList<>(quotes.getQuotes().stream()
+                                            .map(this::toQuoteResponse).toList());
+        for(String id: quotes.getNotFound()){
+            quoteList.add(toNotFoundResponse(id));
+        }
+        return BatchQuotesResponse.builder()
+                                .results(quoteList)
+                                .found(quotes.getFound())
+                                .notFound(quotes.getNotFound().size())
+                                .build();
+                    
+    }
+
+    private QuoteResponse toNotFoundResponse(String id) {
+        return QuoteResponse.builder()
+                        .id(id)
+                        .error("not_found")
+                        .build();   
     }
 }

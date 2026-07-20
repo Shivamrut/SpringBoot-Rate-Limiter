@@ -3,6 +3,7 @@ package com.ratelimiter.rate_limiter.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,13 +39,22 @@ public class QuoteController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateQuoteResponse> createQuote(@Valid @RequestBody CreateQuoteRequest quote) {
+    public ResponseEntity<CreateQuoteResponse> createQuote(
+        @Valid @RequestBody CreateQuoteRequest quote) {
         CreateQuoteResponse response = quoteMapper.toCreateQuoteResponse( quoteService.createQuote(quote.getText(),quote.getAuthor()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // TODO
-    // getQuoteById
-    // getBatchQuote
+    @GetMapping("/{id}")
+    public ResponseEntity<QuoteResponse> getQuoteById(
+        @PathVariable String id
+    ){
+        return quoteService.getQuoteById(id)
+                            .map(quoteMapper::toQuoteResponse)
+                            .map(ResponseEntity::ok)
+                            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    
     
 }
