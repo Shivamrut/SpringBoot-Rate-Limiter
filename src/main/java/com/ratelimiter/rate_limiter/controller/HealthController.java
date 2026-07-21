@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ratelimiter.rate_limiter.dto.HealthResponse;
-import com.ratelimiter.rate_limiter.dto.HealthStatus;
+import com.ratelimiter.rate_limiter.domain.enums.HealthStatus;
+import com.ratelimiter.rate_limiter.dto.response.HealthResponse;
 
 @RestController
 @RequestMapping("/health")

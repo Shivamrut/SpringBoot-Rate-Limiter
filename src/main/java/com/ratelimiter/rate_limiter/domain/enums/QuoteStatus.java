@@ -1,4 +1,4 @@
-package com.ratelimiter.rate_limiter.dto;
+package com.ratelimiter.rate_limiter.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

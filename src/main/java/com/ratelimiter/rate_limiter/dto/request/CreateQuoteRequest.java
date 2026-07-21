@@ -1,4 +1,4 @@
-package com.ratelimiter.rate_limiter.dto;
+package com.ratelimiter.rate_limiter.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

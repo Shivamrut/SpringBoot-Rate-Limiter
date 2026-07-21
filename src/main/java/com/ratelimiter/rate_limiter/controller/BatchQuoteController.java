@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ratelimiter.rate_limiter.dto.BatchQuotesRequest;
-import com.ratelimiter.rate_limiter.dto.BatchQuotesResponse;
+import com.ratelimiter.rate_limiter.dto.request.BatchQuotesRequest;
+import com.ratelimiter.rate_limiter.dto.response.BatchQuotesResponse;
 import com.ratelimiter.rate_limiter.mapper.QuoteMapper;
 import com.ratelimiter.rate_limiter.service.QuoteService;
 

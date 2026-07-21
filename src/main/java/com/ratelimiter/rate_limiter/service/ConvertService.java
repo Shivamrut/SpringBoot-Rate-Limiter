@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
 
-import com.ratelimiter.rate_limiter.dto.ConvertOperation;
+import com.ratelimiter.rate_limiter.domain.enums.ConvertOperation;
 
 @Service
 public class ConvertService {

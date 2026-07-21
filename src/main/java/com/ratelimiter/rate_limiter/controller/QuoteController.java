@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ratelimiter.rate_limiter.dto.CreateQuoteRequest;
-import com.ratelimiter.rate_limiter.dto.CreateQuoteResponse;
-import com.ratelimiter.rate_limiter.dto.QuoteResponse;
+import com.ratelimiter.rate_limiter.dto.request.CreateQuoteRequest;
+import com.ratelimiter.rate_limiter.dto.response.CreateQuoteResponse;
+import com.ratelimiter.rate_limiter.dto.response.QuoteResponse;
 import com.ratelimiter.rate_limiter.mapper.QuoteMapper;
 import com.ratelimiter.rate_limiter.service.QuoteService;
 

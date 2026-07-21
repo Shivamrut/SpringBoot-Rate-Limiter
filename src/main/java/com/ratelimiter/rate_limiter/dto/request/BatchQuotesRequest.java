@@ -1,4 +1,4 @@
-package com.ratelimiter.rate_limiter.dto;
+package com.ratelimiter.rate_limiter.dto.request;
 
 import java.util.List;
 

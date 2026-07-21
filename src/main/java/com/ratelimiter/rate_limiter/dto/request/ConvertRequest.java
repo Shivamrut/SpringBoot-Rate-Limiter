@@ -1,4 +1,6 @@
-package com.ratelimiter.rate_limiter.dto;
+package com.ratelimiter.rate_limiter.dto.request;
+
+import com.ratelimiter.rate_limiter.domain.enums.ConvertOperation;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

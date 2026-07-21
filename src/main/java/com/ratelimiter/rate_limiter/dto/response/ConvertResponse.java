@@ -1,4 +1,6 @@
-package com.ratelimiter.rate_limiter.dto;
+package com.ratelimiter.rate_limiter.dto.response;
+
+import com.ratelimiter.rate_limiter.domain.enums.ConvertOperation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

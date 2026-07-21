@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ratelimiter.rate_limiter.dto.ConvertRequest;
-import com.ratelimiter.rate_limiter.dto.ConvertResponse;
+import com.ratelimiter.rate_limiter.dto.request.ConvertRequest;
+import com.ratelimiter.rate_limiter.dto.response.ConvertResponse;
 import com.ratelimiter.rate_limiter.service.ConvertService;
 
 import jakarta.validation.Valid;

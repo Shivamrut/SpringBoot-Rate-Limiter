@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.ratelimiter.rate_limiter.domain.BatchQuotes;
 import com.ratelimiter.rate_limiter.domain.Quote;
-import com.ratelimiter.rate_limiter.dto.BatchQuotesResponse;
-import com.ratelimiter.rate_limiter.dto.CreateQuoteResponse;
-import com.ratelimiter.rate_limiter.dto.QuoteResponse;
-import com.ratelimiter.rate_limiter.dto.QuoteStatus;
+import com.ratelimiter.rate_limiter.domain.enums.QuoteStatus;
+import com.ratelimiter.rate_limiter.dto.response.BatchQuotesResponse;
+import com.ratelimiter.rate_limiter.dto.response.CreateQuoteResponse;
+import com.ratelimiter.rate_limiter.dto.response.QuoteResponse;
 
 @Component
 public class QuoteMapper {
