@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quote {
-    private static final AtomicInteger idCounter = new AtomicInteger(1020);
+    private static final AtomicInteger idCounter = new AtomicInteger(1050);
     private String id;
     private String text;
     private String author;
