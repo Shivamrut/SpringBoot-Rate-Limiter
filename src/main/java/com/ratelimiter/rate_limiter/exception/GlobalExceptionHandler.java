@@ -10,21 +10,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.ratelimiter.rate_limiter.dto.response.ErrorResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleUnreadable(
-        HttpMessageNotReadableException ex ) {
+        HttpMessageNotReadableException ex,
+        HttpServletRequest request ) {
             ErrorResponse response = ErrorResponse.of(
-                "INVALID_INPUT", "Validation Failed", "requestIDWIP");
-            
+                "INVALID_INPUT", "Validation Failed",
+                request.getAttribute("requestId").toString());
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
-        MethodArgumentNotValidException ex) {
+        MethodArgumentNotValidException ex,
+        HttpServletRequest request) {
             String message = ex.getBindingResult()
             .getFieldErrors()
             .stream()
@@ -35,36 +40,40 @@ public class GlobalExceptionHandler {
             ErrorResponse response = ErrorResponse.of(
                 "INVALID_INPUT",
                 message,
-                "requestIDWIP"
+                request.getAttribute("requestId").toString()
             );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
-    
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFoundException(
-        ResourceNotFoundException ex) {
+        ResourceNotFoundException ex,
+        HttpServletRequest request) {
         String message = ex.getMessage();
 
         ErrorResponse response = ErrorResponse.of(
-            "NOT_FOUND", message, "requestIDWIP");
+            "NOT_FOUND", message, request.getAttribute("requestId").toString());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
-        UnauthorizedException ex) {
+        UnauthorizedException ex,
+        HttpServletRequest request) {
         ErrorResponse response = ErrorResponse.of(
-            "UNAUTHORIZED", ex.getMessage(), "requestIDWIP");
+            "UNAUTHORIZED", ex.getMessage(), request.getAttribute("requestId").toString());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleServerException(
-        Exception ex
+        Exception ex,
+        HttpServletRequest request
     ) {
         ErrorResponse response = ErrorResponse.of(
-            "INTERNAL_ERROR", "An unexpected error occured.", "requestIDWIP");
+            "INTERNAL_ERROR", "An unexpected error occured.",
+            request.getAttribute("requestId").toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
