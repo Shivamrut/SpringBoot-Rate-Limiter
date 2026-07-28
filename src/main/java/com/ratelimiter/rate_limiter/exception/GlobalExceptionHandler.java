@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.ratelimiter.rate_limiter.dto.response.ErrorResponse;
+import com.ratelimiter.rate_limiter.web.ApiConstants;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,8 +21,19 @@ public class GlobalExceptionHandler {
         HttpMessageNotReadableException ex,
         HttpServletRequest request ) {
             ErrorResponse response = ErrorResponse.of(
-                "INVALID_INPUT", "Validation Failed",
-                request.getAttribute("requestId").toString());
+                "INVALID_INPUT", "Malformed request body.",
+                requestId(request));
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidInput(
+        IllegalArgumentException ex,
+        HttpServletRequest request ) {
+            ErrorResponse response = ErrorResponse.of(
+                "INVALID_INPUT", "Invalid input",
+                requestId(request));
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -40,7 +52,7 @@ public class GlobalExceptionHandler {
             ErrorResponse response = ErrorResponse.of(
                 "INVALID_INPUT",
                 message,
-                request.getAttribute("requestId").toString()
+                requestId(request)
             );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -52,7 +64,7 @@ public class GlobalExceptionHandler {
         String message = ex.getMessage();
 
         ErrorResponse response = ErrorResponse.of(
-            "NOT_FOUND", message, request.getAttribute("requestId").toString());
+            "NOT_FOUND", message, requestId(request));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -61,7 +73,7 @@ public class GlobalExceptionHandler {
         UnauthorizedException ex,
         HttpServletRequest request) {
         ErrorResponse response = ErrorResponse.of(
-            "UNAUTHORIZED", ex.getMessage(), request.getAttribute("requestId").toString());
+            "UNAUTHORIZED", ex.getMessage(), requestId(request));
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(response);
     }
@@ -72,8 +84,13 @@ public class GlobalExceptionHandler {
         HttpServletRequest request
     ) {
         ErrorResponse response = ErrorResponse.of(
-            "INTERNAL_ERROR", "An unexpected error occured.",
-            request.getAttribute("requestId").toString());
+            "INTERNAL_ERROR", "An unexpected error occurred.",
+            requestId(request));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    private String requestId(HttpServletRequest request) {
+        Object value = request.getAttribute(ApiConstants.Attributes.REQUEST_ID);
+        return value == null ? "unknown" : value.toString();
     }
 }

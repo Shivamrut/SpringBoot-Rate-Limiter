@@ -7,6 +7,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import com.ratelimiter.rate_limiter.domain.Client;
 import com.ratelimiter.rate_limiter.exception.UnauthorizedException;
 import com.ratelimiter.rate_limiter.repository.ClientRepository;
+import com.ratelimiter.rate_limiter.web.ApiConstants;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +25,7 @@ public class AuthInterceptor implements  HandlerInterceptor{
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
                 // logic for auth
-                String apiKey = request.getHeader("X-API-Key");
+                String apiKey = request.getHeader(ApiConstants.Headers.API_KEY);
                 if(!StringUtils.hasText(apiKey)){
                     throw new UnauthorizedException("Missing or invalid API key");
                 }
@@ -32,7 +33,7 @@ public class AuthInterceptor implements  HandlerInterceptor{
                 if (client == null) {
                     throw new UnauthorizedException("Missing or invalid API key");
                 }
-                request.setAttribute("client", client);
+                request.setAttribute(ApiConstants.Attributes.CLIENT, client);
         return true;
     }
 }
